@@ -1,9 +1,9 @@
-
-import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, MapPin, Camera, Clock, CheckCircle2, User, MessageSquare, Send, Upload, Phone, FileText, ChevronRight, Image as ImageIcon, Briefcase, QrCode, Megaphone, Globe, Bell, ShieldCheck, Award, FileUp, X, RotateCcw, AlertTriangle, RefreshCw, Link as LinkIcon, Paperclip } from 'lucide-react';
-import { Employee, Location, AttendanceStatus, LogEntry, ReportEntry, ChatMessage, FileEntry, Announcement, Language, UserRole, CompanyConfig } from '../types.ts';
-import { WORK_SITE_LOCATION, ALLOWED_RADIUS_METERS, TRANSLATIONS } from '../constants.ts';
-import CameraView from './CameraView.tsx';
+import React, { useState } from 'react';
+import { LogOut, Clock, CheckCircle2, User, MessageSquare, Send, FileText, ChevronRight, Briefcase, QrCode, Megaphone, Globe, ShieldCheck } from 'lucide-react';
+// Added missing Announcement type to the import list below.
+import { Employee, AttendanceStatus, LogEntry, ReportEntry, ChatMessage, FileEntry, Language, CompanyConfig, Announcement } from '../types';
+import { WORK_SITE_LOCATION, ALLOWED_RADIUS_METERS, TRANSLATIONS } from '../constants';
+import CameraView from './CameraView';
 
 interface WorkerDashboardProps {
   employee: Employee;
@@ -187,7 +187,7 @@ const WorkerDashboard: React.FC<WorkerDashboardProps> = ({
                 <span className="text-xs font-bold text-slate-600">{t.verified}</span>
               </div>
               <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <Phone size={20} className="text-slate-400" />
+                <Globe size={20} className="text-slate-400" />
                 <span className="text-xs font-bold text-slate-600">{employee.phone}</span>
               </div>
             </div>
