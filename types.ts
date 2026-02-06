@@ -25,7 +25,7 @@ export interface Location {
 
 export interface CompanyConfig {
   name: string;
-  logo: string; // Base64 or URL
+  logo: string;
 }
 
 export interface LogEntry {
@@ -46,17 +46,18 @@ export interface Department {
   name: string;
   nameEn: string;
   color: string;
+  headId?: string; // ID of the worker who is the head
 }
 
 export interface ReportEntry {
   id: string;
   employeeId: string;
   employeeName: string;
-  departmentId?: string;
+  departmentId: string;
   content: string;
+  type: 'text' | 'file' | 'link';
+  attachmentUrl?: string;
   timestamp: string;
-  fileUrl?: string;
-  fileName?: string;
 }
 
 export interface ChatMessage {
@@ -65,9 +66,9 @@ export interface ChatMessage {
   senderName: string;
   text: string;
   timestamp: string;
-  type: 'group' | 'private';
+  type: 'group' | 'private' | 'multi';
   departmentId?: string;
-  recipientId?: string;
+  recipientIds?: string[]; // Multiple recipients
 }
 
 export interface FileEntry {
@@ -97,10 +98,10 @@ export interface Employee {
   password?: string;
   departmentId: string;
   isRegistered?: boolean;
-  responsibilities?: string;
   isShiftRequired: boolean;
   shiftStart?: string; 
   shiftEnd?: string;   
+  workplace?: string; // Location name/area assigned
 }
 
 export type Language = 'ar' | 'en';
