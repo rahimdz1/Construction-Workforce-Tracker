@@ -22,24 +22,6 @@
             border-radius: 1.5rem;
             z-index: 1;
         }
-        #root:empty {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: #0f172a;
-        }
-        #root:empty::after {
-            content: "جاري تشغيل النظام...";
-            color: #3b82f6;
-            font-size: 1.2rem;
-            font-weight: bold;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
     </style>
 <script type="importmap">
 {
@@ -59,9 +41,7 @@
 </head>
 <body class="bg-slate-50">
     <div id="root"></div>
-    <!-- تحميل مكتبة الخرائط بشكل مستقل لضمان الأداء -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- استخدام مسار نسبي صحيح لملف التشغيل؛ سيقوم Vite بتحويله تلقائياً عند البناء -->
-    <script type="module" src="./index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
