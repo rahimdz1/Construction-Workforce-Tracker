@@ -1,7 +1,7 @@
 
 [build]
-  publish = "."
-  command = "echo 'No build step required for ESM-based app'"
+  command = "npm run build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
