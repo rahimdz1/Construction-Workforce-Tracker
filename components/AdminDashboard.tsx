@@ -1,23 +1,17 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
-  Users, Map as MapIcon, FileText, Bell, LogOut, Search, Download, 
-  Briefcase, MessageSquare, Send, Plus, Filter, QrCode, Edit, Trash2, 
-  Megaphone, BellRing, X, Camera, Globe, Phone, Clock, ShieldCheck, 
-  UserCheck, Award, FileUp, Sparkles, RefreshCw, ChevronLeft, ChevronRight, Lock, 
-  Eye, LayoutGrid, List, FileArchive, CheckCircle2, Upload, ExternalLink, MapPin,
-  Settings as SettingsIcon, Image as ImageIcon, Link as LinkIcon, Paperclip, Loader2,
-  // Added missing AlertTriangle icon import
-  AlertTriangle
+  Users, Map as MapIcon, FileText, LogOut, Search, 
+  MessageSquare, Plus, Globe, Clock, ShieldCheck, 
+  UserCheck, Sparkles, RefreshCw, LayoutGrid, MapPin,
+  Settings as SettingsIcon, AlertTriangle, Loader2
 } from 'lucide-react';
 import { 
   LogEntry, Employee, AttendanceStatus, ReportEntry, ChatMessage, 
-  Department, FileEntry, Announcement, Language, UserRole, CompanyConfig
-} from '../types.ts';
-import { TRANSLATIONS } from '../constants.ts';
-import MapView from './MapView.tsx';
-import QRScanner from './QRScanner.tsx';
-import { analyzeAttendance } from '../geminiService.ts';
+  Department, FileEntry, Announcement, Language, CompanyConfig
+} from '../types';
+import { TRANSLATIONS } from '../constants';
+import MapView from './MapView';
+import { analyzeAttendance } from '../geminiService';
 
 interface AdminDashboardProps {
   logs: LogEntry[];
@@ -40,9 +34,8 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  logs, reports, chatMessages, departmentFiles, employees, departments,
-  announcements, companyConfig, lang, onSetLang, onSendMessage, onLogout,
-  onUpdateEmployees, onUpdateDepartments, onUpdateAnnouncements, onUpdateFiles, onUpdateCompanyConfig
+  logs, reports, employees, departments,
+  companyConfig, lang, onSetLang, onLogout
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'employees' | 'reports' | 'chat' | 'announcements' | 'settings'>('overview');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -82,7 +75,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             { id: 'employees', icon: Users, label: t.workersManagement },
             { id: 'reports', icon: FileText, label: t.reports },
             { id: 'chat', icon: MessageSquare, label: t.chat },
-            { id: 'announcements', icon: Megaphone, label: t.announcements },
             { id: 'settings', icon: SettingsIcon, label: lang === 'ar' ? 'الإعدادات' : 'Settings' }
           ].map(item => (
             <button 
@@ -113,17 +105,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <h2 className="font-bold text-slate-800 text-lg uppercase tracking-tight">
             {TRANSLATIONS[lang][activeTab as keyof typeof TRANSLATIONS['en']] || activeTab}
           </h2>
-          <div className="flex items-center gap-4">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input 
-                type="text" 
-                placeholder={t.search} 
-                className="bg-slate-50 border-none rounded-full py-2 pl-10 pr-4 text-sm w-64 focus:ring-1 focus:ring-blue-600"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+          <div className="relative hidden md:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input 
+              type="text" 
+              placeholder={t.search} 
+              className="bg-slate-50 border-none rounded-full py-2 pl-10 pr-4 text-sm w-64 focus:ring-1 focus:ring-blue-600"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </header>
 
@@ -197,7 +187,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <tr key={log.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <img src={log.photo} className="w-10 h-10 rounded-xl object-cover" />
+                              <img src={log.photo} className="w-10 h-10 rounded-xl object-cover" alt="Employee" />
                               <div className="font-bold text-sm text-slate-800">{log.name}</div>
                             </div>
                           </td>
@@ -220,12 +210,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           )}
 
           {activeTab === 'map' && (
-            <div className="h-[calc(100vh-160px)] bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-inner p-2 relative animate-in fade-in duration-500">
+            <div className="h-[calc(100vh-160px)] bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-inner p-2 relative">
                <MapView logs={logs} highlightLogId={selectedLogId} />
             </div>
           )}
 
-          {activeTab === 'employees' && (
+          {activeTab === 'employees' && ( activeTab === 'employees' && (
             <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                <div className="flex justify-between items-center">
                   <h3 className="font-bold text-slate-800 text-xl">{t.workersManagement}</h3>
@@ -237,7 +227,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   {employees.map(emp => (
                     <div key={emp.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
                        <div className="w-20 h-20 rounded-2xl overflow-hidden mb-4 shadow-inner border border-slate-100 p-1">
-                          <img src={emp.avatar} className="w-full h-full object-cover rounded-xl" />
+                          <img src={emp.avatar} className="w-full h-full object-cover rounded-xl" alt={emp.name} />
                        </div>
                        <h4 className="font-bold text-slate-800">{emp.name}</h4>
                        <p className="text-[10px] text-blue-600 font-bold uppercase mb-4">{emp.role}</p>
@@ -255,7 +245,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   ))}
                </div>
             </div>
-          )}
+          ))}
 
           {activeTab === 'reports' && (
             <div className="space-y-6 animate-in fade-in duration-500">
