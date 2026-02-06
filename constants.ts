@@ -1,5 +1,4 @@
-
-import { Employee, Department, UserRole } from './types.ts';
+import { Employee, Department, UserRole } from './types';
 
 export const ADMIN_PIN = '000';
 
@@ -32,7 +31,7 @@ export const TRANSLATIONS = {
     checkOut: 'تسجيل انصراف',
     shift: 'الوردية',
     shiftStart: 'البداية',
-    shiftEnd: 'النهاية',
+    shiftEnd: ' النهاية',
     verified: 'موثق',
     workersManagement: 'إدارة الموظفين',
     overview: 'نظرة عامة',
