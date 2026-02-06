@@ -73,8 +73,16 @@ const App: React.FC = () => {
 
   const handleUpdateEmployees = async (updated: Employee[]) => {
     setEmployees(updated);
-    // Logic to only upsert the difference or full list
-    await supabase.from('employees').upsert(updated);
+    // Sync with database
+    const { error } = await supabase.from('employees').upsert(updated);
+    if (error) console.error("Error updating employees:", error);
+  };
+
+  const handleUpdateDepartments = async (updated: Department[]) => {
+    setDepartments(updated);
+    // Sync with database
+    const { error } = await supabase.from('departments').upsert(updated);
+    if (error) console.error("Error updating departments:", error);
   };
 
   const handleLogin = (e?: React.FormEvent) => {
@@ -143,10 +151,7 @@ const App: React.FC = () => {
         }} 
         onLogout={() => setCurrentUser(null)} 
         onUpdateEmployees={handleUpdateEmployees}
-        onUpdateDepartments={async (d) => { 
-          setDepartments(d); 
-          await supabase.from('departments').upsert(d);
-        }}
+        onUpdateDepartments={handleUpdateDepartments}
         onUpdateAnnouncements={async (a) => { 
           setAnnouncements(a); 
           await supabase.from('announcements').upsert(a);
