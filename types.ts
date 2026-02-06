@@ -1,4 +1,3 @@
-
 export enum UserRole {
   WORKER = 'WORKER',
   SUPERVISOR = 'SUPERVISOR',
@@ -46,7 +45,7 @@ export interface Department {
   name: string;
   nameEn: string;
   color: string;
-  headId?: string; // ID of the worker who is the head
+  headId?: string; 
 }
 
 export interface ReportEntry {
@@ -57,6 +56,7 @@ export interface ReportEntry {
   content: string;
   type: 'text' | 'file' | 'link';
   attachmentUrl?: string;
+  attachmentName?: string;
   timestamp: string;
 }
 
@@ -68,7 +68,7 @@ export interface ChatMessage {
   timestamp: string;
   type: 'group' | 'private' | 'multi';
   departmentId?: string;
-  recipientIds?: string[]; // Multiple recipients
+  recipientIds?: string[];
 }
 
 export interface FileEntry {
@@ -101,7 +101,9 @@ export interface Employee {
   isShiftRequired: boolean;
   shiftStart?: string; 
   shiftEnd?: string;   
-  workplace?: string; // Location name/area assigned
+  workplace?: string; 
+  workplaceLat?: number;
+  workplaceLng?: number;
 }
 
 export type Language = 'ar' | 'en';
