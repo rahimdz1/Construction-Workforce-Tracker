@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
-import { Employee, LogEntry, ReportEntry, ChatMessage, FileEntry, Announcement, Language, UserRole, Department, CompanyConfig } from './types.ts';
-import { MOCK_EMPLOYEES, ADMIN_PIN, DEPARTMENTS as INITIAL_DEPARTMENTS, TRANSLATIONS } from './constants.ts';
-import WorkerDashboard from './components/WorkerDashboard.tsx';
-import AdminDashboard from './components/AdminDashboard.tsx';
-import { ShieldCheck, Lock, Globe, Phone, AlertCircle, Sparkles, Loader2, HardHat } from 'lucide-react';
-import { supabase } from './supabaseClient.ts';
+import { Employee, LogEntry, ReportEntry, ChatMessage, FileEntry, Announcement, Language, Department, CompanyConfig } from './types';
+import { MOCK_EMPLOYEES, ADMIN_PIN, DEPARTMENTS as INITIAL_DEPARTMENTS, TRANSLATIONS } from './constants';
+import WorkerDashboard from './components/WorkerDashboard';
+import AdminDashboard from './components/AdminDashboard';
+import { ShieldCheck, Loader2 } from 'lucide-react';
+import { supabase } from './supabaseClient';
 
 const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('ar');
@@ -73,17 +72,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleUpdateCompanyConfig = async (config: CompanyConfig) => {
-    setCompanyConfig(config);
-    await supabase.from('company_config').upsert({ id: 1, name: config.name, logo: config.logo });
-  };
-
   const handleUpdateEmployees = async (updated: Employee[]) => {
     setEmployees(updated);
     await supabase.from('employees').upsert(updated);
   };
 
-  const handleLogin = async (e?: React.FormEvent) => {
+  const handleLogin = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!phoneInput) return;
     setError(null);
@@ -158,7 +152,10 @@ const App: React.FC = () => {
           await supabase.from('announcements').upsert(a);
         }}
         onUpdateFiles={async (f) => { setFiles(f); await supabase.from('files').upsert(f); }}
-        onUpdateCompanyConfig={handleUpdateCompanyConfig}
+        onUpdateCompanyConfig={async (c) => {
+          setCompanyConfig(c);
+          await supabase.from('company_config').upsert({ id: 1, name: c.name, logo: c.logo });
+        }}
       />
     );
   }
