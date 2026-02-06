@@ -3,11 +3,11 @@ import {
   Users, Map as MapIcon, FileText, LogOut, Search, 
   MessageSquare, Plus, Globe, Clock, ShieldCheck, 
   UserCheck, Sparkles, RefreshCw, LayoutGrid, MapPin,
-  Settings as SettingsIcon, AlertTriangle, Loader2
+  Settings as SettingsIcon, AlertTriangle, Loader2, X
 } from 'lucide-react';
 import { 
   LogEntry, Employee, AttendanceStatus, ReportEntry, ChatMessage, 
-  Department, FileEntry, Announcement, Language, CompanyConfig
+  Department, FileEntry, Announcement, Language, CompanyConfig, UserRole
 } from '../types';
 import { TRANSLATIONS } from '../constants';
 import MapView from './MapView';
@@ -34,14 +34,17 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  logs, reports, employees, departments,
-  companyConfig, lang, onSetLang, onLogout
+  logs, reports, chatMessages, employees, departments,
+  companyConfig, lang, onSetLang, onLogout, onUpdateEmployees
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'employees' | 'reports' | 'chat' | 'announcements' | 'settings'>('overview');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({ name: '', phone: '', role: '', departmentId: '' });
+
   const t = TRANSLATIONS[lang];
 
   const handleRunAiAnalysis = async () => {
@@ -49,6 +52,26 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const result = await analyzeAttendance(logs.slice(0, 50));
     setAiAnalysis(result);
     setIsAnalyzing(false);
+  };
+
+  const handleAddEmployee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const employee: Employee = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: newEmployee.name,
+      phone: newEmployee.phone,
+      role: newEmployee.role,
+      departmentId: newEmployee.departmentId || departments[0]?.id,
+      userRole: UserRole.WORKER,
+      avatar: `https://picsum.photos/seed/${newEmployee.name}/100/100`,
+      password: '123', // Initial password
+      isShiftRequired: true,
+      shiftStart: '08:00',
+      shiftEnd: '16:00'
+    };
+    await onUpdateEmployees([...employees, employee]);
+    setShowAddEmployeeModal(false);
+    setNewEmployee({ name: '', phone: '', role: '', departmentId: '' });
   };
 
   const stats = {
@@ -60,6 +83,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   return (
     <div className={`min-h-screen bg-slate-100 flex ${lang === 'ar' ? 'rtl' : 'ltr'}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      {/* Sidebar */}
       <aside className="w-20 md:w-64 bg-white border-r flex flex-col sticky top-0 h-screen z-50">
         <div className="p-6 border-b flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg overflow-hidden">
@@ -167,45 +191,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   )}
                 </div>
               </div>
-
-              <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
-                <div className="p-6 border-b flex justify-between items-center bg-slate-50/50">
-                  <h3 className="font-bold text-slate-800">آخر التحركات</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-right">
-                    <thead>
-                      <tr className="bg-slate-50/50 text-slate-500 text-[10px] uppercase font-bold tracking-widest">
-                        <th className="px-6 py-4">الموظف</th>
-                        <th className="px-6 py-4">التوقيت</th>
-                        <th className="px-6 py-4">الحالة</th>
-                        <th className="px-6 py-4">الموقع</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {logs.slice(0, 8).map(log => (
-                        <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <img src={log.photo} className="w-10 h-10 rounded-xl object-cover" alt="Employee" />
-                              <div className="font-bold text-sm text-slate-800">{log.name}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-xs text-slate-500">{log.timestamp}</td>
-                          <td className="px-6 py-4">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${log.status === AttendanceStatus.OUT_OF_BOUNDS ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                              {log.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <button onClick={() => { setActiveTab('map'); setSelectedLogId(log.id); }} className="text-blue-500 hover:scale-110 transition-transform"><MapPin size={18} /></button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
             </div>
           )}
 
@@ -215,11 +200,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           )}
 
-          {activeTab === 'employees' && ( activeTab === 'employees' && (
+          {activeTab === 'employees' && (
             <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                <div className="flex justify-between items-center">
                   <h3 className="font-bold text-slate-800 text-xl">{t.workersManagement}</h3>
-                  <button className="bg-blue-600 text-white font-bold px-6 py-3 rounded-2xl shadow-lg flex items-center gap-2 hover:bg-blue-500 active:scale-95 transition-all">
+                  <button 
+                    onClick={() => setShowAddEmployeeModal(true)}
+                    className="bg-blue-600 text-white font-bold px-6 py-3 rounded-2xl shadow-lg flex items-center gap-2 hover:bg-blue-500 active:scale-95 transition-all"
+                  >
                     <Plus size={20} /> إضافة موظف
                   </button>
                </div>
@@ -245,31 +233,90 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   ))}
                </div>
             </div>
-          ))}
+          )}
 
           {activeTab === 'reports' && (
             <div className="space-y-6 animate-in fade-in duration-500">
                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
                   <div className="p-6 border-b bg-slate-50/50"><h3 className="font-bold text-slate-800">{t.reports}</h3></div>
                   <div className="divide-y divide-slate-100">
-                    {reports.map(report => (
+                    {reports.length > 0 ? reports.map(report => (
                       <div key={report.id} className="p-6 hover:bg-slate-50 transition-all flex flex-col gap-3">
                          <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                               <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold text-xs">{report.employeeName.charAt(0)}</div>
+                               <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold text-xs">{(report.employeeName || '?').charAt(0)}</div>
                                <span className="font-bold text-sm text-slate-800">{report.employeeName}</span>
                             </div>
                             <span className="text-[10px] text-slate-400">{report.timestamp}</span>
                          </div>
                          <p className="text-xs text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100 leading-relaxed">{report.content}</p>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="p-12 text-center text-slate-400">لا توجد تقارير حالياً</div>
+                    )}
                   </div>
                </div>
             </div>
           )}
+
+          {activeTab === 'chat' && (
+            <div className="flex flex-col h-[70vh] bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-500">
+              <div className="p-4 bg-slate-50 border-b flex items-center justify-between">
+                <h3 className="font-bold text-slate-800">دردشة النظام</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {chatMessages.map(msg => (
+                  <div key={msg.id} className={`flex flex-col ${msg.senderId === 'ADMIN' ? 'items-end' : 'items-start'}`}>
+                    <div className={`max-w-[70%] p-4 rounded-2xl text-sm ${msg.senderId === 'ADMIN' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-100 text-slate-800 rounded-tl-none'}`}>
+                      <p className="text-[10px] font-bold opacity-70 mb-1">{msg.senderName}</p>
+                      {msg.text}
+                    </div>
+                    <span className="text-[9px] text-slate-400 mt-1">{msg.timestamp}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
+
+      {/* Add Employee Modal */}
+      {showAddEmployeeModal && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+            <div className="p-6 bg-blue-600 text-white flex justify-between items-center">
+              <h3 className="font-bold">إضافة موظف جديد</h3>
+              <button onClick={() => setShowAddEmployeeModal(false)} className="hover:bg-white/20 p-2 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleAddEmployee} className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">اسم الموظف</label>
+                  <input required value={newEmployee.name} onChange={e => setNewEmployee({...newEmployee, name: e.target.value})} type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-sm focus:border-blue-600 outline-none" placeholder="الاسم الكامل" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">رقم الهاتف</label>
+                  <input required value={newEmployee.phone} onChange={e => setNewEmployee({...newEmployee, phone: e.target.value})} type="tel" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-sm focus:border-blue-600 outline-none" placeholder="05XXXXXXXX" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">الدور الوظيفي</label>
+                  <input required value={newEmployee.role} onChange={e => setNewEmployee({...newEmployee, role: e.target.value})} type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-sm focus:border-blue-600 outline-none" placeholder="مثلاً: عامل صيانة" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">القسم</label>
+                  <select required value={newEmployee.departmentId} onChange={e => setNewEmployee({...newEmployee, departmentId: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-sm focus:border-blue-600 outline-none">
+                    <option value="">اختر القسم</option>
+                    {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl hover:bg-blue-700 active:scale-95 transition-all">حفظ الموظف</button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
