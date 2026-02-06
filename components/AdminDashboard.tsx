@@ -4,7 +4,7 @@ import {
   Users, Map as MapIcon, FileText, LogOut, Search, 
   MessageSquare, Plus, Globe, Clock, ShieldCheck, 
   UserCheck, Sparkles, RefreshCw, LayoutGrid, MapPin,
-  Settings as SettingsIcon, AlertTriangle, Loader2, X, Trash2, Edit2, Palette, Building2, QrCode, Check, Send, Paperclip, Link as LinkIcon, Info, Calendar, Filter
+  Settings as SettingsIcon, AlertTriangle, Loader2, X, Trash2, Edit2, Palette, Building2, QrCode, Check, Send, Paperclip, Link as LinkIcon, Info, Calendar, Filter, ArrowUpDown
 } from 'lucide-react';
 import { 
   LogEntry, Employee, AttendanceStatus, ReportEntry, ChatMessage, 
@@ -83,9 +83,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  /**
-   * Fix: Implement handleRunAiAnalysis to trigger the Gemini-powered analysis
-   */
   const handleRunAiAnalysis = async () => {
     setIsAnalyzing(true);
     setAiAnalysis(null);
@@ -94,7 +91,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setAiAnalysis(result);
     } catch (error) {
       console.error("AI Analysis Error:", error);
-      setAiAnalysis("حدث خطأ أثناء تحليل البيانات بالذكاء الاصطناعي.");
+      setAiAnalysis("حدث خطأ أثناء تحليل البيانات.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -143,131 +140,158 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   return (
     <div className={`min-h-screen bg-slate-50 flex ${lang === 'ar' ? 'rtl' : 'ltr'}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Sidebar - Pro Design */}
-      <aside className="w-20 md:w-64 bg-slate-900 text-white flex flex-col h-screen sticky top-0 shrink-0">
+      {/* Sidebar - Enhanced Professional Sidebar */}
+      <aside className="w-20 md:w-64 bg-slate-900 text-white flex flex-col h-screen sticky top-0 shrink-0 z-[60]">
         <div className="p-6 border-b border-white/5 flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shrink-0">
             {companyConfig.logo ? <img src={companyConfig.logo} className="w-full h-full object-contain" /> : <ShieldCheck size={24} />}
           </div>
-          <span className="font-bold text-xs uppercase hidden md:block">{companyConfig.name}</span>
+          <span className="font-bold text-xs uppercase hidden md:block tracking-widest">{companyConfig.name}</span>
         </div>
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto mt-4">
           {[
             { id: 'overview', icon: LayoutGrid, label: 'الرئيسية' },
-            { id: 'map', icon: MapIcon, label: 'الخريطة' },
-            { id: 'employees', icon: Users, label: 'العمال' },
-            { id: 'reports', icon: FileText, label: 'التقارير' },
-            { id: 'chat', icon: MessageSquare, label: 'الدردشة' },
-            { id: 'settings', icon: SettingsIcon, label: 'الإعدادات' }
+            { id: 'map', icon: MapIcon, label: 'الخريطة الميدانية' },
+            { id: 'employees', icon: Users, label: 'إدارة العمال' },
+            { id: 'reports', icon: FileText, label: 'التقارير الميدانية' },
+            { id: 'chat', icon: MessageSquare, label: 'الدردشة الجماعية' },
+            { id: 'settings', icon: SettingsIcon, label: 'إعدادات النظام' }
           ].map(item => (
-            <button key={item.id} onClick={() => setActiveTab(item.id as any)} className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all ${activeTab === item.id ? 'bg-blue-600 shadow-lg' : 'text-slate-400 hover:bg-white/5'}`}>
+            <button key={item.id} onClick={() => setActiveTab(item.id as any)} className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all duration-200 ${activeTab === item.id ? 'bg-blue-600 shadow-xl text-white' : 'text-slate-400 hover:bg-white/5'}`}>
               <item.icon size={18} /> <span className="text-[10px] font-bold hidden md:block uppercase tracking-wider">{item.label}</span>
             </button>
           ))}
         </nav>
+        
         <div className="p-4 border-t border-white/5 space-y-2">
-           <button onClick={() => setShowQRScanner(true)} className="w-full flex items-center gap-3 p-3 bg-white/5 rounded-xl text-blue-400"><QrCode size={18} /> <span className="text-[9px] font-bold hidden md:block">مسح QR</span></button>
-           <button onClick={onLogout} className="w-full flex items-center gap-3 p-3 text-red-400"><LogOut size={18} /> <span className="text-[9px] font-bold hidden md:block">خروج</span></button>
+           <button onClick={() => setShowQRScanner(true)} className="w-full flex items-center gap-3 p-3 bg-white/5 rounded-xl text-blue-400 hover:bg-white/10 transition-colors"><QrCode size={18} /> <span className="text-[9px] font-bold hidden md:block uppercase tracking-widest">مسح هويـة</span></button>
+           <button onClick={onLogout} className="w-full flex items-center gap-3 p-3 text-red-400 hover:bg-red-500/10 transition-colors"><LogOut size={18} /> <span className="text-[9px] font-bold hidden md:block uppercase tracking-widest">تسجيل الخروج</span></button>
         </div>
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-40">
-          <h2 className="font-bold text-slate-800 text-md uppercase">{activeTab}</h2>
-          <div className="hidden md:flex items-center bg-slate-100 rounded-xl px-4 py-2 gap-2">
+        <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+          <h2 className="font-bold text-slate-800 text-sm uppercase tracking-tight">{activeTab} Dashboard</h2>
+          <div className="hidden md:flex items-center bg-slate-50 border rounded-xl px-4 py-2 gap-3">
             <Search size={14} className="text-slate-400" />
-            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="bg-transparent border-none outline-none text-xs w-48" placeholder="بحث..." />
+            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="bg-transparent border-none outline-none text-xs w-48 font-bold text-slate-700" placeholder="بحث سريع في النظام..." />
           </div>
         </header>
 
-        <div className="p-6 md:p-8 flex-1 overflow-y-auto">
+        <div className="p-6 md:p-10 flex-1 overflow-y-auto">
           {activeTab === 'overview' && (
-            <div className="space-y-6">
-               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-8 animate-in fade-in">
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
-                    { label: 'العمال', val: employees.length, icon: Users, color: 'blue' },
+                    { label: 'إجمالي الكادر', val: employees.length, icon: Users, color: 'blue' },
                     { label: 'حضور اليوم', val: logs.filter(l => l.type === 'IN').length, icon: UserCheck, color: 'emerald' },
                     { label: 'خارج الموقع', val: logs.filter(l => l.status === AttendanceStatus.OUT_OF_BOUNDS).length, icon: AlertTriangle, color: 'red' },
                     { label: 'تقارير نشطة', val: sortedReports.length, icon: FileText, color: 'amber' }
                   ].map((s, idx) => (
-                    <div key={idx} className="bg-white p-6 rounded-3xl border shadow-sm flex items-center gap-4">
-                      <div className={`w-12 h-12 bg-${s.color}-50 text-${s.color}-600 rounded-2xl flex items-center justify-center`}><s.icon size={24} /></div>
-                      <div><p className="text-[9px] text-slate-400 font-bold uppercase">{s.label}</p><p className="text-xl font-bold">{s.val}</p></div>
+                    <div key={idx} className="bg-white p-6 rounded-[2rem] border shadow-sm flex items-center gap-5 hover:border-blue-300 transition-all group">
+                      <div className={`w-14 h-14 bg-${s.color}-50 text-${s.color}-600 rounded-[1.2rem] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform`}><s.icon size={28} /></div>
+                      <div><p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{s.label}</p><p className="text-2xl font-bold text-slate-800">{s.val}</p></div>
                     </div>
                   ))}
                </div>
                
-               <div className="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
-                  <div className="relative z-10 space-y-4">
-                    <h3 className="text-xl font-bold flex items-center gap-2"><Sparkles className="text-amber-400" /> تحليلات الذكاء الاصطناعي</h3>
-                    <p className="text-xs opacity-80 max-w-lg">احصل على ملخص شامل لأداء العمال والإنتاجية من خلال تحليل سجلات الحضور والتقارير الميدانية.</p>
-                    <button onClick={handleRunAiAnalysis} className="bg-white text-blue-900 font-bold px-6 py-3 rounded-xl shadow-lg text-xs hover:scale-105 transition-all">تحليل البيانات الآن</button>
-                    {isAnalyzing && <div className="mt-4 flex items-center gap-2"><Loader2 className="animate-spin" size={16} /> <span className="text-[10px]">جاري التحليل...</span></div>}
-                    {aiAnalysis && <div className="mt-4 p-4 bg-white/10 rounded-2xl text-xs leading-relaxed border border-white/20">{aiAnalysis}</div>}
+               <div className="bg-gradient-to-br from-indigo-700 to-blue-800 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-10 translate-x-10 blur-3xl" />
+                  <div className="relative z-10 space-y-6">
+                    <h3 className="text-2xl font-bold flex items-center gap-3"><Sparkles className="text-amber-400" size={32} /> التحليلات الذكية (Gemini AI)</h3>
+                    <p className="text-sm opacity-90 max-w-2xl leading-relaxed">احصل على رؤية ثاقبة لأداء عمالك اليوم من خلال تحليل البيانات التاريخية وسلوك الحضور الميداني.</p>
+                    <button onClick={handleRunAiAnalysis} className="bg-white text-blue-900 font-bold px-10 py-4 rounded-[1.2rem] shadow-xl text-xs hover:scale-105 transition-all uppercase tracking-widest flex items-center gap-3">
+                       {isAnalyzing ? <Loader2 className="animate-spin" size={16} /> : <RefreshCw size={16} />}
+                       تحليل البيانات الميدانية
+                    </button>
+                    {aiAnalysis && (
+                       <div className="mt-8 p-8 bg-black/20 backdrop-blur-md rounded-[2rem] text-sm leading-relaxed border border-white/10 animate-in slide-in-from-top-4">
+                          <p className="font-bold text-xs uppercase text-blue-300 mb-2 border-b border-white/10 pb-2">نتائج التحليل التلقائي:</p>
+                          {aiAnalysis}
+                       </div>
+                    )}
                   </div>
                </div>
             </div>
           )}
 
           {activeTab === 'reports' && (
-            <div className="space-y-6 animate-in fade-in">
-               <div className="bg-white p-6 rounded-[2rem] border shadow-sm space-y-6">
-                  <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center gap-3">
-                       <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><FileText size={24} /></div>
-                       <div><h3 className="font-bold text-slate-800">سجل التقارير الميدانية</h3><p className="text-[9px] text-slate-400 font-bold uppercase">Field Operation Logs</p></div>
+            <div className="space-y-8 animate-in fade-in">
+               <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm space-y-8">
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-4">
+                       <div className="p-4 bg-amber-50 text-amber-600 rounded-[1.5rem] shadow-inner"><FileText size={28} /></div>
+                       <div><h3 className="font-bold text-slate-800 text-xl tracking-tight">الأرشيف الميداني للتقارير</h3><p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Field Operation Audit Logs</p></div>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border w-full md:w-auto overflow-x-auto">
-                       <button onClick={() => setReportFilterDept('all')} className={`px-4 py-2 rounded-xl text-[9px] font-bold uppercase ${reportFilterDept === 'all' ? 'bg-white shadow text-blue-600' : 'text-slate-400'}`}>الكل</button>
+                    <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border w-full md:w-auto overflow-x-auto scrollbar-hide shadow-inner">
+                       <button onClick={() => setReportFilterDept('all')} className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all ${reportFilterDept === 'all' ? 'bg-white shadow text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>الكل</button>
                        {departments.map(d => (
-                         <button key={d.id} onClick={() => setReportFilterDept(d.id)} className={`px-4 py-2 rounded-xl text-[9px] font-bold uppercase whitespace-nowrap ${reportFilterDept === d.id ? 'bg-white shadow text-blue-600' : 'text-slate-400'}`}>{d.name}</button>
+                         <button key={d.id} onClick={() => setReportFilterDept(d.id)} className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase whitespace-nowrap transition-all ${reportFilterDept === d.id ? 'bg-white shadow text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>{d.name}</button>
                        ))}
                     </div>
                   </div>
 
-                  <div className="bg-amber-50/50 border border-amber-100 p-4 rounded-2xl flex items-center gap-3 text-amber-700">
-                     <Info size={16} /> <p className="text-[10px] font-bold uppercase">سيتم حذف التقارير تلقائياً بعد مرور 30 يوماً</p>
+                  {/* Warning Note */}
+                  <div className="bg-amber-50/70 border border-amber-200 p-5 rounded-[1.5rem] flex items-center gap-4 text-amber-800">
+                     <div className="p-2 bg-amber-100 rounded-lg"><Info size={20} /></div>
+                     <div className="flex-1">
+                        <p className="text-xs font-bold uppercase mb-1">تنبيه الحذف التلقائي:</p>
+                        <p className="text-[10px] opacity-80 leading-relaxed font-bold">يتم تنظيف قاعدة البيانات تلقائياً من التقارير التي تجاوزت الـ 30 يوماً لضمان استقرار وسرعة النظام الميداني.</p>
+                     </div>
                   </div>
 
-                  <div className="overflow-x-auto">
+                  {/* Table View - Requested Layout */}
+                  <div className="overflow-x-auto rounded-[2rem] border border-slate-100">
                     <table className="w-full text-right border-collapse">
                       <thead>
                         <tr className="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
-                          <th className="p-4 rounded-tr-2xl text-right">الموظف</th>
-                          <th className="p-4 text-right">التاريخ</th>
-                          <th className="p-4 text-right">القسم</th>
-                          <th className="p-4 text-right">المحتوى</th>
-                          <th className="p-4 rounded-tl-2xl text-center">المرفقات</th>
+                          <th className="p-6 text-right">الموظف الميداني</th>
+                          <th className="p-6 text-right flex items-center gap-2">التاريخ <ArrowUpDown size={12} /></th>
+                          <th className="p-6 text-right">القسم المختص</th>
+                          <th className="p-6 text-right">محتوى التقرير</th>
+                          <th className="p-6 text-center">المرفقات</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {sortedReports.length > 0 ? sortedReports.map(report => (
-                          <tr key={report.id} className="hover:bg-slate-50/50 transition-all">
-                            <td className="p-4">
+                          <tr key={report.id} className="hover:bg-blue-50/30 transition-all group">
+                            <td className="p-6">
                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-[10px]">{report.employeeName.charAt(0)}</div>
-                                  <span className="font-bold text-slate-800 text-xs">{report.employeeName}</span>
+                                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-colors">{report.employeeName.charAt(0)}</div>
+                                  <div>
+                                     <span className="font-bold text-slate-800 text-xs block">{report.employeeName}</span>
+                                     <span className="text-[9px] text-slate-400 uppercase">Worker Profile</span>
+                                  </div>
                                </div>
                             </td>
-                            <td className="p-4 text-[10px] font-bold text-slate-500 whitespace-nowrap">{new Date(report.timestamp).toLocaleDateString()}</td>
-                            <td className="p-4">
-                               <span className="text-[9px] px-2 py-1 bg-slate-100 rounded-full font-bold text-slate-600">{departments.find(d => d.id === report.departmentId)?.name || report.departmentId}</span>
+                            <td className="p-6 text-[10px] font-bold text-slate-500 whitespace-nowrap">
+                               <div className="flex flex-col">
+                                  <span>{new Date(report.timestamp).toLocaleDateString()}</span>
+                                  <span className="opacity-50">{new Date(report.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                               </div>
                             </td>
-                            <td className="p-4 max-w-[250px]">
-                               <p className="text-[10px] text-slate-600 truncate">{report.content}</p>
+                            <td className="p-6">
+                               <span className="text-[9px] px-3 py-1 bg-slate-100 rounded-full font-bold text-slate-500 group-hover:bg-blue-100 transition-colors uppercase">
+                                  {departments.find(d => d.id === report.departmentId)?.name || report.departmentId}
+                               </span>
                             </td>
-                            <td className="p-4">
+                            <td className="p-6 max-w-[300px]">
+                               <p className="text-[11px] text-slate-600 leading-relaxed font-bold truncate group-hover:text-slate-800">{report.content}</p>
+                            </td>
+                            <td className="p-6">
                                <div className="flex justify-center gap-2">
-                                  {report.type === 'link' && <a href={report.attachmentUrl} target="_blank" className="p-2 bg-blue-50 text-blue-600 rounded-lg"><LinkIcon size={14} /></a>}
-                                  {report.type === 'file' && <a href={report.attachmentUrl} download={report.attachmentName} className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Paperclip size={14} /></a>}
-                                  {!report.attachmentUrl && <span className="text-[9px] text-slate-300">لا يوجد</span>}
+                                  {report.type === 'link' && <a href={report.attachmentUrl} target="_blank" className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"><LinkIcon size={16} /></a>}
+                                  {report.type === 'file' && <a href={report.attachmentUrl} download={report.attachmentName} className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"><Paperclip size={16} /></a>}
+                                  {!report.attachmentUrl && <span className="text-[9px] text-slate-300 font-bold uppercase">N/A</span>}
                                </div>
                             </td>
                           </tr>
                         )) : (
                           <tr>
-                            <td colSpan={5} className="p-12 text-center opacity-30 flex flex-col items-center gap-2">
-                               <FileText size={48} /> <p className="font-bold text-sm uppercase">لا توجد تقارير حالياً</p>
+                            <td colSpan={5} className="p-24 text-center opacity-30 flex flex-col items-center gap-4">
+                               <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto"><FileText size={48} /></div>
+                               <p className="font-bold text-sm uppercase tracking-widest">لا توجد تقارير ميدانية في هذا القسم حالياً</p>
                             </td>
                           </tr>
                         )}
@@ -278,25 +302,68 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           )}
 
-          {activeTab === 'employees' && (
-            <div className="space-y-6">
-               <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] border shadow-sm">
-                  <h3 className="font-bold text-slate-800 text-lg">إدارة الكادر البشري</h3>
-                  <button onClick={() => setShowAddEmployeeModal(true)} className="bg-blue-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 text-xs"><Plus size={16} /> إضافة عامل</button>
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {employees.filter(e => e.name.includes(searchQuery)).map(emp => (
-                    <div key={emp.id} className="bg-white p-6 rounded-[2.5rem] border shadow-sm flex flex-col items-center text-center group relative hover:border-blue-400 transition-all">
-                       <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                          <button onClick={() => { setEditingEmp(emp); setShowEmployeeEditModal(true); }} className="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-blue-600"><Edit2 size={16} /></button>
-                          <button onClick={() => { if(confirm('حذف العامل؟')) onUpdateEmployees(employees.filter(e => e.id !== emp.id)) }} className="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-red-500"><Trash2 size={16} /></button>
+          {activeTab === 'map' && (
+             <div className="h-[75vh] bg-white rounded-[3rem] border shadow-xl overflow-hidden relative p-3 animate-in zoom-in">
+                <MapView logs={logs} />
+             </div>
+          )}
+
+          {activeTab === 'chat' && (
+             <div className="flex flex-col h-[75vh] bg-white rounded-[3.5rem] border shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
+                <div className="p-8 bg-slate-50 border-b flex gap-4 overflow-x-auto scrollbar-hide shadow-inner">
+                   <button onClick={() => setChatTarget({type: 'all'})} className={`px-10 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all ${chatTarget.type === 'all' ? 'bg-slate-900 text-white shadow-xl' : 'bg-white text-slate-500 hover:bg-slate-100'}`}>بث للجميع</button>
+                   {departments.map(d => (
+                     <button key={d.id} onClick={() => setChatTarget({type: 'dept', id: d.id})} className={`px-10 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${chatTarget.type === 'dept' && chatTarget.id === d.id ? 'bg-slate-900 text-white shadow-xl' : 'bg-white text-slate-500 hover:bg-slate-100'}`}>{d.name}</button>
+                   ))}
+                </div>
+                <div className="flex-1 overflow-y-auto p-10 space-y-6 bg-slate-50/10">
+                   {chatMessages.filter(m => chatTarget.type === 'all' || (chatTarget.type === 'dept' && m.departmentId === chatTarget.id)).map(msg => (
+                     <div key={msg.id} className={`flex flex-col ${msg.senderId === 'ADMIN' ? 'items-end' : 'items-start'}`}>
+                       <div className={`max-w-[75%] p-6 rounded-[2rem] text-[11px] shadow-sm transition-all hover:scale-[1.01] ${msg.senderId === 'ADMIN' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'}`}>
+                         <p className="text-[9px] font-bold opacity-60 mb-2 uppercase tracking-widest">{msg.senderName}</p>
+                         <p className="leading-relaxed">{msg.text}</p>
                        </div>
-                       <div className="w-20 h-20 rounded-3xl overflow-hidden border p-1 mb-4 shadow-inner bg-slate-50"><img src={emp.avatar} className="w-full h-full object-cover rounded-2xl" /></div>
-                       <h4 className="font-bold text-slate-800 text-md">{emp.name}</h4>
-                       <p className="text-[9px] text-blue-600 font-bold uppercase mb-4 tracking-widest">{emp.role}</p>
-                       <div className="w-full space-y-2 text-[10px] font-bold text-slate-400 border-t pt-4">
-                          <div className="flex justify-between"><span>القسم:</span><span className="text-slate-800">{departments.find(d => d.id === emp.departmentId)?.name}</span></div>
-                          <div className="flex justify-between"><span>الموقع:</span><span className="text-slate-800 truncate max-w-[120px]">{emp.workplace || 'غير محدد'}</span></div>
+                       <span className="text-[8px] text-slate-400 mt-2 font-bold opacity-60 px-2">{msg.timestamp}</span>
+                     </div>
+                   ))}
+                </div>
+                <div className="p-8 border-t bg-white flex gap-5 items-center">
+                   <input 
+                      value={chatInput} 
+                      onChange={e => setChatInput(e.target.value)} 
+                      className="flex-1 bg-slate-50 border-none rounded-[1.5rem] px-8 py-5 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-600 shadow-inner" 
+                      placeholder="اكتب رسالة توجيهية للقسم المختار..." 
+                   />
+                   <button onClick={handleSendChat} className="p-5 bg-blue-600 text-white rounded-[1.5rem] shadow-2xl hover:bg-blue-500 hover:scale-105 active:scale-95 transition-all"><Send size={24} /></button>
+                </div>
+             </div>
+          )}
+
+          {activeTab === 'employees' && (
+            <div className="space-y-8 animate-in slide-in-from-bottom-4">
+               <div className="flex justify-between items-center bg-white p-8 rounded-[2.5rem] border shadow-sm">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-2xl tracking-tight">إدارة الكوادر والمواقع</h3>
+                    <p className="text-slate-400 text-xs font-bold mt-1 uppercase tracking-widest">Workforce Registry & Assignments</p>
+                  </div>
+                  <button onClick={() => setShowAddEmployeeModal(true)} className="bg-blue-600 text-white font-bold px-8 py-4 rounded-[1.5rem] shadow-xl hover:bg-blue-500 transition-all flex items-center gap-3 text-xs"><Plus size={20} /> إضافة عامل ميداني</button>
+               </div>
+               
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {employees.filter(e => e.name.includes(searchQuery)).map(emp => (
+                    <div key={emp.id} className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm flex flex-col items-center text-center group relative hover:border-blue-400 transition-all overflow-hidden">
+                       <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                          <button onClick={() => { setEditingEmp(emp); setShowEmployeeEditModal(true); }} className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-blue-600 shadow-sm"><Edit2 size={16} /></button>
+                          <button onClick={() => { if(confirm('حذف العامل؟')) onUpdateEmployees(employees.filter(e => e.id !== emp.id)) }} className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-red-500 shadow-sm"><Trash2 size={16} /></button>
+                       </div>
+                       
+                       <div className="w-24 h-24 rounded-[2rem] overflow-hidden border-2 p-1 mb-6 shadow-inner bg-slate-50 group-hover:scale-105 transition-transform"><img src={emp.avatar} className="w-full h-full object-cover rounded-[1.8rem]" /></div>
+                       <h4 className="font-bold text-slate-800 text-lg">{emp.name}</h4>
+                       <p className="text-[10px] text-blue-600 font-bold uppercase mb-6 tracking-widest">{emp.role}</p>
+                       
+                       <div className="w-full space-y-3 pt-6 border-t border-slate-100">
+                          <div className="flex justify-between items-center text-[10px] font-bold"><span className="text-slate-400">القسم:</span><span className="text-slate-800">{departments.find(d => d.id === emp.departmentId)?.name}</span></div>
+                          <div className="flex justify-between items-center text-[10px] font-bold"><span className="text-slate-400">الموقع:</span><span className="text-slate-800 truncate max-w-[120px]">{emp.workplace || 'غير محدد'}</span></div>
                        </div>
                     </div>
                   ))}
@@ -305,15 +372,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           )}
 
           {activeTab === 'settings' && (
-            <div className="space-y-6">
-               <div className="bg-white p-10 rounded-[2.5rem] border shadow-sm space-y-8">
-                  <h3 className="font-bold text-xl flex items-center gap-3"><Palette className="text-emerald-500" /> هيكلة الأقسام والمسؤولين</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-10 animate-in slide-in-from-bottom-8">
+               <div className="bg-white p-12 rounded-[3.5rem] border shadow-sm space-y-10">
+                  <h3 className="font-bold text-2xl flex items-center gap-4 border-b border-slate-50 pb-8"><Palette className="text-emerald-500" size={32} /> إدارة الأقسام وتوزيع المهام</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {departments.map(dept => (
-                      <div key={dept.id} className="p-6 bg-slate-50 rounded-3xl border space-y-4">
-                        <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-full" style={{backgroundColor: dept.color}} /><p className="font-bold text-slate-800">{dept.name}</p></div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block px-1">رئيس القسم المسؤول</label>
+                      <div key={dept.id} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6 hover:border-blue-300 hover:bg-white transition-all shadow-sm">
+                        <div className="flex items-center gap-4">
+                           <div className="w-6 h-6 rounded-full shadow-inner border-2 border-white" style={{backgroundColor: dept.color}} />
+                           <p className="font-bold text-slate-800 text-lg">{dept.name}</p>
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block px-1">رئيس القسم المعتمد</label>
                           <select 
                             value={dept.headId || ''} 
                             onChange={e => {
@@ -326,9 +396,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                });
                                onUpdateEmployees(updatedEmps);
                             }}
-                            className="w-full bg-white border rounded-xl p-3 text-xs font-bold shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full bg-white border border-slate-200 rounded-2xl p-4 text-xs font-bold outline-none shadow-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
                           >
-                            <option value="">تعيين رئيس قسم...</option>
+                            <option value="">اختر رئيس قسم من العمال...</option>
                             {employees.filter(e => e.departmentId === dept.id).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                           </select>
                         </div>
@@ -341,41 +411,66 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </main>
 
-      {/* Modals for Adding/Editing */}
+      {/* Employee Editor Modal */}
       {(showEmployeeEditModal || showAddEmployeeModal) && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-6">
-           <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in">
-              <div className="p-8 bg-slate-900 text-white flex justify-between items-center">
-                <h3 className="font-bold text-xl">{editingEmp ? `تعديل البيانات` : 'إضافة عامل جديد'}</h3>
-                <button onClick={() => { setShowEmployeeEditModal(false); setShowAddEmployeeModal(false); }} className="p-2 hover:bg-white/10 rounded-full"><X size={24} /></button>
+        <div className="fixed inset-0 z-[100] bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-6">
+           <div className="bg-white w-full max-w-xl rounded-[4rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+              <div className="p-10 bg-slate-900 text-white flex justify-between items-center">
+                <h3 className="font-bold text-2xl tracking-tight">{editingEmp ? `تعديل الملف: ${editingEmp.name}` : 'إضافة عضو ميداني جديد'}</h3>
+                <button onClick={() => { setShowEmployeeEditModal(false); setShowAddEmployeeModal(false); }} className="p-3 hover:bg-white/10 rounded-full transition-all"><X size={28} /></button>
               </div>
-              <form onSubmit={handleSaveEmployee} className="p-10 space-y-6">
-                 {editingEmp ? (
-                   <div className="space-y-4">
-                      <div><label className="text-[10px] font-bold text-slate-400 uppercase block mb-2 px-1">الاسم الكامل</label><input value={editingEmp.name} onChange={e => setEditingEmp({...editingEmp, name: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold" /></div>
-                      <div><label className="text-[10px] font-bold text-slate-400 uppercase block mb-2 px-1">الموقع الميداني (GPS)</label><input value={editingEmp.workplace || ''} onChange={e => setEditingEmp({...editingEmp, workplace: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold" placeholder="مثلاً: الموقع رقم 5" /></div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div><label className="text-[10px] font-bold text-slate-400 uppercase block mb-2 px-1">خط العرض</label><input type="number" step="any" value={editingEmp.workplaceLat || ''} onChange={e => setEditingEmp({...editingEmp, workplaceLat: parseFloat(e.target.value)})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold" /></div>
-                        <div><label className="text-[10px] font-bold text-slate-400 uppercase block mb-2 px-1">خط الطول</label><input type="number" step="any" value={editingEmp.workplaceLng || ''} onChange={e => setEditingEmp({...editingEmp, workplaceLng: parseFloat(e.target.value)})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold" /></div>
-                      </div>
-                      <div><label className="text-[10px] font-bold text-slate-400 uppercase block mb-2 px-1">القسم</label>
-                        <select value={editingEmp.departmentId} onChange={e => setEditingEmp({...editingEmp, departmentId: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold">
+              <form onSubmit={handleSaveEmployee} className="p-12 space-y-8 max-h-[70vh] overflow-y-auto scrollbar-hide">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {editingEmp ? (
+                      <>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">الاسم الكامل</label>
+                          <input value={editingEmp.name} onChange={e => setEditingEmp({...editingEmp, name: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold shadow-inner" />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">رقم الهاتف</label>
+                          <input value={editingEmp.phone} onChange={e => setEditingEmp({...editingEmp, phone: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold shadow-inner" />
+                        </div>
+                        <div className="space-y-3 col-span-2">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">الموقع الميداني (GPS Area)</label>
+                          <input value={editingEmp.workplace || ''} onChange={e => setEditingEmp({...editingEmp, workplace: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold shadow-inner" placeholder="اسم الموقع الميداني" />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">خط العرض (Lat)</label>
+                          <input type="number" step="any" value={editingEmp.workplaceLat || ''} onChange={e => setEditingEmp({...editingEmp, workplaceLat: parseFloat(e.target.value)})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold shadow-inner" />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">خط الطول (Lng)</label>
+                          <input type="number" step="any" value={editingEmp.workplaceLng || ''} onChange={e => setEditingEmp({...editingEmp, workplaceLng: parseFloat(e.target.value)})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold shadow-inner" />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">بداية الوردية</label>
+                          <input type="time" value={editingEmp.shiftStart || '08:00'} onChange={e => setEditingEmp({...editingEmp, shiftStart: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold shadow-inner" />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">نهاية الوردية</label>
+                          <input type="time" value={editingEmp.shiftEnd || '16:00'} onChange={e => setEditingEmp({...editingEmp, shiftEnd: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold shadow-inner" />
+                        </div>
+                        <div className="space-y-3 col-span-2">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">القسم الميداني</label>
+                          <select value={editingEmp.departmentId} onChange={e => setEditingEmp({...editingEmp, departmentId: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold shadow-inner">
+                            {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                          </select>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="col-span-2 space-y-4">
+                        <input required value={newEmployeeForm.name} onChange={e => setNewEmployeeForm({...newEmployeeForm, name: e.target.value})} placeholder="الاسم الكامل" className="w-full bg-slate-50 border rounded-2xl p-5 text-sm font-bold shadow-inner" />
+                        <input required value={newEmployeeForm.phone} onChange={e => setNewEmployeeForm({...newEmployeeForm, phone: e.target.value})} placeholder="رقم الهاتف" className="w-full bg-slate-50 border rounded-2xl p-5 text-sm font-bold shadow-inner" />
+                        <input required value={newEmployeeForm.role} onChange={e => setNewEmployeeForm({...newEmployeeForm, role: e.target.value})} placeholder="المسمى الوظيفي" className="w-full bg-slate-50 border rounded-2xl p-5 text-sm font-bold shadow-inner" />
+                        <select required value={newEmployeeForm.departmentId} onChange={e => setNewEmployeeForm({...newEmployeeForm, departmentId: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-5 text-sm font-bold shadow-inner">
+                          <option value="">اختر القسم الميداني...</option>
                           {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                         </select>
                       </div>
-                   </div>
-                 ) : (
-                   <div className="space-y-4">
-                      <input required value={newEmployeeForm.name} onChange={e => setNewEmployeeForm({...newEmployeeForm, name: e.target.value})} placeholder="الاسم الكامل" className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold" />
-                      <input required value={newEmployeeForm.phone} onChange={e => setNewEmployeeForm({...newEmployeeForm, phone: e.target.value})} placeholder="رقم الهاتف" className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold" />
-                      <input required value={newEmployeeForm.role} onChange={e => setNewEmployeeForm({...newEmployeeForm, role: e.target.value})} placeholder="المسمى الوظيفي" className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold" />
-                      <select required value={newEmployeeForm.departmentId} onChange={e => setNewEmployeeForm({...newEmployeeForm, departmentId: e.target.value})} className="w-full bg-slate-50 border rounded-2xl p-4 text-sm font-bold">
-                        <option value="">اختر القسم...</option>
-                        {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                      </select>
-                   </div>
-                 )}
-                 <button type="submit" className="w-full bg-blue-600 text-white font-bold py-5 rounded-[1.5rem] shadow-xl hover:bg-blue-700 transition-all">حفظ البيانات</button>
+                    )}
+                 </div>
+                 <button type="submit" className="w-full bg-blue-600 text-white font-bold py-6 rounded-[2rem] shadow-2xl hover:bg-blue-700 transition-all text-sm uppercase tracking-widest">تحديث كافة البيانات الميدانية</button>
               </form>
            </div>
         </div>
@@ -384,15 +479,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {showQRScanner && <QRScanner onScan={handleQRScan} onClose={() => setShowQRScanner(false)} lang={lang} />}
 
       {selectedEmployee && (
-        <div className="fixed inset-0 z-[110] bg-slate-900/90 backdrop-blur-xl flex items-center justify-center p-6">
-           <div className="bg-white w-full max-w-sm rounded-[4rem] shadow-2xl p-10 text-center space-y-8 animate-in zoom-in">
-              <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden mx-auto border-8 border-slate-50 p-1 shadow-2xl bg-white"><img src={selectedEmployee.avatar} className="w-full h-full object-cover rounded-[2rem]" /></div>
-              <div><h3 className="text-2xl font-bold text-slate-800 tracking-tight">{selectedEmployee.name}</h3><p className="text-blue-600 font-bold text-xs uppercase tracking-widest">{selectedEmployee.role}</p></div>
-              <div className="space-y-4 text-right">
-                 <div className="p-5 bg-slate-50 rounded-[2rem] border flex justify-between items-center"><span className="text-[10px] font-bold text-slate-400 uppercase">القسم</span><span className="font-bold text-slate-800">{departments.find(d => d.id === selectedEmployee.departmentId)?.name}</span></div>
-                 <div className="p-5 bg-slate-50 rounded-[2rem] border flex justify-between items-center"><span className="text-[10px] font-bold text-slate-400 uppercase">الموقع</span><span className="font-bold text-slate-800 text-xs truncate max-w-[120px]">{selectedEmployee.workplace || 'لم يحدد'}</span></div>
+        <div className="fixed inset-0 z-[110] bg-slate-900/90 backdrop-blur-2xl flex items-center justify-center p-6">
+           <div className="bg-white w-full max-w-sm rounded-[4rem] shadow-2xl p-12 text-center space-y-8 animate-in zoom-in">
+              <div className="w-36 h-36 rounded-[3.5rem] overflow-hidden mx-auto border-8 border-slate-50 p-1 shadow-2xl bg-white"><img src={selectedEmployee.avatar} className="w-full h-full object-cover rounded-[3rem]" /></div>
+              <div className="space-y-2">
+                <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{selectedEmployee.name}</h3>
+                <p className="text-blue-600 font-bold text-sm uppercase tracking-[0.3em]">{selectedEmployee.role}</p>
               </div>
-              <button onClick={() => setSelectedEmployee(null)} className="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-bold">إغلاق الهوية</button>
+              <div className="space-y-4 text-right">
+                 <div className="p-6 bg-slate-50 rounded-[2rem] border flex justify-between items-center shadow-inner"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">القسم</span><span className="font-bold text-slate-800">{departments.find(d => d.id === selectedEmployee.departmentId)?.name || 'غير محدد'}</span></div>
+                 <div className="p-6 bg-slate-50 rounded-[2rem] border flex justify-between items-center shadow-inner"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">الموقع</span><span className="font-bold text-slate-800 text-xs truncate max-w-[150px]">{selectedEmployee.workplace || 'لم يحدد'}</span></div>
+              </div>
+              <button onClick={() => setSelectedEmployee(null)} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-bold shadow-2xl hover:bg-slate-800 transition-all uppercase tracking-widest">إغلاق ملف الهوية</button>
            </div>
         </div>
       )}
