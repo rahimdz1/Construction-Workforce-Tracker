@@ -1,0 +1,9 @@
+
+[build]
+  publish = "."
+  command = "echo 'No build step required for ESM-based app'"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

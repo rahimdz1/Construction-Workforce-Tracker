@@ -1,0 +1,8 @@
+{
+  "name": "Construction Workforce Tracker",
+  "description": "A comprehensive attendance and tracking system for construction and public works companies, featuring GPS verification, photo logging, and an admin dashboard.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
