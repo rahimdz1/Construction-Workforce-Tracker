@@ -57,7 +57,7 @@ export interface ReportEntry {
   type: 'text' | 'file' | 'link';
   attachmentUrl?: string;
   attachmentName?: string;
-  timestamp: string;
+  timestamp: string; // ISO format for sorting/cleanup
 }
 
 export interface ChatMessage {
