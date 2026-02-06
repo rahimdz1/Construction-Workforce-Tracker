@@ -3,7 +3,7 @@ import {
   Users, Map as MapIcon, FileText, LogOut, Search, 
   MessageSquare, Plus, Globe, Clock, ShieldCheck, 
   UserCheck, Sparkles, RefreshCw, LayoutGrid, MapPin,
-  Settings as SettingsIcon, AlertTriangle, Loader2, X
+  Settings as SettingsIcon, AlertTriangle, Loader2, X, Trash2, Edit2, Palette, Building2
 } from 'lucide-react';
 import { 
   LogEntry, Employee, AttendanceStatus, ReportEntry, ChatMessage, 
@@ -35,18 +35,28 @@ interface AdminDashboardProps {
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
   logs, reports, chatMessages, employees, departments,
-  companyConfig, lang, onSetLang, onLogout, onUpdateEmployees
+  companyConfig, lang, onSetLang, onLogout, onUpdateEmployees,
+  onUpdateDepartments, onUpdateCompanyConfig
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'employees' | 'reports' | 'chat' | 'announcements' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'map' | 'employees' | 'reports' | 'chat' | 'settings'>('overview');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  
+  // Modals States
   const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
   const [newEmployee, setNewEmployee] = useState({ name: '', phone: '', role: '', departmentId: '' });
+  
+  const [showDeptModal, setShowDeptModal] = useState(false);
+  const [editingDept, setEditingDept] = useState<Department | null>(null);
+  const [deptForm, setDeptForm] = useState({ name: '', nameEn: '', color: '#3b82f6' });
+
+  const [compConfigForm, setCompConfigForm] = useState({ name: companyConfig.name, logo: companyConfig.logo });
 
   const t = TRANSLATIONS[lang];
 
+  // AI Logic
   const handleRunAiAnalysis = async () => {
     setIsAnalyzing(true);
     const result = await analyzeAttendance(logs.slice(0, 50));
@@ -54,6 +64,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setIsAnalyzing(false);
   };
 
+  // Employee Logic
   const handleAddEmployee = async (e: React.FormEvent) => {
     e.preventDefault();
     const employee: Employee = {
@@ -61,10 +72,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       name: newEmployee.name,
       phone: newEmployee.phone,
       role: newEmployee.role,
-      departmentId: newEmployee.departmentId || departments[0]?.id,
+      departmentId: newEmployee.departmentId || departments[0]?.id || 'default',
       userRole: UserRole.WORKER,
       avatar: `https://picsum.photos/seed/${newEmployee.name}/100/100`,
-      password: '123', // Initial password
+      password: '123',
       isShiftRequired: true,
       shiftStart: '08:00',
       shiftEnd: '16:00'
@@ -72,6 +83,41 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     await onUpdateEmployees([...employees, employee]);
     setShowAddEmployeeModal(false);
     setNewEmployee({ name: '', phone: '', role: '', departmentId: '' });
+  };
+
+  const handleDeleteEmployee = async (id: string) => {
+    if (confirm(lang === 'ar' ? 'هل أنت متأكد من حذف هذا الموظف؟' : 'Are you sure you want to delete this employee?')) {
+      await onUpdateEmployees(employees.filter(emp => emp.id !== id));
+    }
+  };
+
+  // Department Logic
+  const handleSaveDepartment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingDept) {
+      const updated = departments.map(d => d.id === editingDept.id ? { ...d, ...deptForm } : d);
+      await onUpdateDepartments(updated);
+    } else {
+      const newDept: Department = {
+        id: 'dept_' + Math.random().toString(36).substr(2, 5),
+        ...deptForm
+      };
+      await onUpdateDepartments([...departments, newDept]);
+    }
+    setShowDeptModal(false);
+    setEditingDept(null);
+    setDeptForm({ name: '', nameEn: '', color: '#3b82f6' });
+  };
+
+  const handleDeleteDepartment = async (id: string) => {
+    if (confirm(lang === 'ar' ? 'حذف القسم سيؤثر على الموظفين المنتمين له، هل أنت متأكد؟' : 'Deleting a department affects its employees, proceed?')) {
+      await onUpdateDepartments(departments.filter(d => d.id !== id));
+    }
+  };
+
+  const handleUpdateConfig = async () => {
+    await onUpdateCompanyConfig(compConfigForm);
+    alert(lang === 'ar' ? 'تم تحديث إعدادات الشركة' : 'Company settings updated');
   };
 
   const stats = {
@@ -213,7 +259,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {employees.map(emp => (
-                    <div key={emp.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
+                    <div key={emp.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center text-center relative group">
+                       <button 
+                        onClick={() => handleDeleteEmployee(emp.id)}
+                        className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                       >
+                         <Trash2 size={16} />
+                       </button>
                        <div className="w-20 h-20 rounded-2xl overflow-hidden mb-4 shadow-inner border border-slate-100 p-1">
                           <img src={emp.avatar} className="w-full h-full object-cover rounded-xl" alt={emp.name} />
                        </div>
@@ -277,10 +329,91 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             </div>
           )}
+
+          {activeTab === 'settings' && (
+            <div className="space-y-8 animate-in slide-in-from-bottom-6 duration-500">
+              {/* Company Profile Settings */}
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                <div className="flex items-center gap-3 border-b pb-4">
+                  <Building2 className="text-blue-600" />
+                  <h3 className="font-bold text-slate-800">بيانات المؤسسة</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">اسم الشركة</label>
+                    <input 
+                      value={compConfigForm.name} 
+                      onChange={e => setCompConfigForm({...compConfigForm, name: e.target.value})}
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-sm focus:border-blue-600 outline-none" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">رابط الشعار (URL)</label>
+                    <input 
+                      value={compConfigForm.logo} 
+                      onChange={e => setCompConfigForm({...compConfigForm, logo: e.target.value})}
+                      placeholder="https://..."
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-sm focus:border-blue-600 outline-none" 
+                    />
+                  </div>
+                </div>
+                <button 
+                  onClick={handleUpdateConfig}
+                  className="bg-blue-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:bg-blue-700 active:scale-95 transition-all"
+                >
+                  حفظ التعديلات
+                </button>
+              </div>
+
+              {/* Departments Management */}
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                <div className="flex items-center justify-between border-b pb-4">
+                  <div className="flex items-center gap-3">
+                    <Palette className="text-emerald-600" />
+                    <h3 className="font-bold text-slate-800">إدارة الأقسام</h3>
+                  </div>
+                  <button 
+                    onClick={() => { setEditingDept(null); setDeptForm({ name: '', nameEn: '', color: '#3b82f6' }); setShowDeptModal(true); }}
+                    className="text-emerald-600 font-bold text-xs flex items-center gap-1 hover:bg-emerald-50 px-3 py-2 rounded-xl"
+                  >
+                    <Plus size={16} /> إضافة قسم
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {departments.map(dept => (
+                    <div key={dept.id} className="p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-10 rounded-full" style={{ backgroundColor: dept.color }} />
+                        <div>
+                          <p className="font-bold text-slate-800 text-sm">{dept.name}</p>
+                          <p className="text-[10px] text-slate-400">{dept.nameEn}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => { setEditingDept(dept); setDeptForm({ name: dept.name, nameEn: dept.nameEn, color: dept.color }); setShowDeptModal(true); }}
+                          className="p-2 text-slate-400 hover:text-blue-600"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteDepartment(dept.id)}
+                          className="p-2 text-slate-400 hover:text-red-500"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Add Employee Modal */}
+      {/* Add/Edit Employee Modal */}
       {showAddEmployeeModal && (
         <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
@@ -313,6 +446,42 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
               <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl hover:bg-blue-700 active:scale-95 transition-all">حفظ الموظف</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Dept Modal */}
+      {showDeptModal && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+            <div className="p-6 bg-emerald-600 text-white flex justify-between items-center">
+              <h3 className="font-bold">{editingDept ? 'تعديل قسم' : 'إضافة قسم جديد'}</h3>
+              <button onClick={() => setShowDeptModal(false)} className="hover:bg-white/20 p-2 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveDepartment} className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">اسم القسم (عربي)</label>
+                  <input required value={deptForm.name} onChange={e => setDeptForm({...deptForm, name: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-sm focus:border-emerald-600 outline-none" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">اسم القسم (EN)</label>
+                  <input required value={deptForm.nameEn} onChange={e => setDeptForm({...deptForm, nameEn: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-sm focus:border-emerald-600 outline-none" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase mr-2">لون القسم</label>
+                  <div className="flex gap-3 items-center">
+                    <input type="color" value={deptForm.color} onChange={e => setDeptForm({...deptForm, color: e.target.value})} className="w-12 h-12 rounded-lg border-none cursor-pointer" />
+                    <span className="text-xs text-slate-500 font-mono uppercase">{deptForm.color}</span>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" className="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-xl hover:bg-emerald-700 active:scale-95 transition-all">
+                {editingDept ? 'تحديث القسم' : 'حفظ القسم'}
+              </button>
             </form>
           </div>
         </div>
