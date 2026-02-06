@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Employee, LogEntry, ReportEntry, ChatMessage, FileEntry, Announcement, Language, Department, CompanyConfig } from './types';
-import { MOCK_EMPLOYEES, ADMIN_PIN, DEPARTMENTS as INITIAL_DEPARTMENTS, TRANSLATIONS } from './constants';
+import { MOCK_EMPLOYEES, ADMIN_PIN, DEPARTMENTS as INITIAL_DEPARTMENTS, TRANSLATIONS, MOCK_REPORTS, MOCK_CHATS } from './constants';
 import WorkerDashboard from './components/WorkerDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import { ShieldCheck, Loader2 } from 'lucide-react';
@@ -39,16 +39,17 @@ const App: React.FC = () => {
       const { data: depts } = await supabase.from('departments').select('*');
       const { data: attLogs } = await supabase.from('attendance_logs').select('*').order('timestamp', { ascending: false });
       const { data: repts } = await supabase.from('reports').select('*');
-      const { data: msgs } = await supabase.from('chat_messages').select('*');
+      const { data: msgs } = await supabase.from('chat_messages').select('*').order('timestamp', { ascending: true });
       const { data: fls } = await supabase.from('files').select('*');
       const { data: anns } = await supabase.from('announcements').select('*');
       const { data: config } = await supabase.from('company_config').select('*').maybeSingle();
 
-      if (emps) setEmployees(emps.length ? emps : MOCK_EMPLOYEES);
-      else setEmployees(MOCK_EMPLOYEES);
-
-      if (depts) setDepartments(depts.length ? depts : INITIAL_DEPARTMENTS);
-      else setDepartments(INITIAL_DEPARTMENTS);
+      setEmployees(emps && emps.length ? emps : MOCK_EMPLOYEES);
+      setDepartments(depts && depts.length ? depts : INITIAL_DEPARTMENTS);
+      setReports(repts && repts.length ? repts : MOCK_REPORTS);
+      setMessages(msgs && msgs.length ? msgs : MOCK_CHATS);
+      setFiles(fls || []);
+      setAnnouncements(anns || []);
 
       if (attLogs) {
         setLogs(attLogs.map((l: any) => ({
@@ -57,16 +58,14 @@ const App: React.FC = () => {
         })));
       }
       
-      if (repts) setReports(repts);
-      if (msgs) setMessages(msgs);
-      if (fls) setFiles(fls);
-      if (anns) setAnnouncements(anns);
       if (config) setCompanyConfig({ name: config.name, logo: config.logo });
 
     } catch (err) {
       console.error("Fetch Error:", err);
       setEmployees(MOCK_EMPLOYEES);
       setDepartments(INITIAL_DEPARTMENTS);
+      setReports(MOCK_REPORTS);
+      setMessages(MOCK_CHATS);
     } finally {
       setLoading(false);
     }
@@ -74,6 +73,7 @@ const App: React.FC = () => {
 
   const handleUpdateEmployees = async (updated: Employee[]) => {
     setEmployees(updated);
+    // Logic to only upsert the difference or full list
     await supabase.from('employees').upsert(updated);
   };
 
