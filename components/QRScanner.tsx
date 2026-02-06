@@ -1,6 +1,5 @@
-
 import React, { useRef, useEffect, useState } from 'react';
-import jsQR from 'https://esm.sh/jsqr@1.4.0';
+import jsQR from 'jsqr';
 import { X, Camera, RefreshCw } from 'lucide-react';
 
 interface QRScannerProps {
@@ -16,9 +15,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose, lang }) => {
 
   useEffect(() => {
     let animationFrameId: number;
+    let stream: MediaStream | null = null;
+
     const startScanner = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           videoRef.current.setAttribute("playsinline", "true");
@@ -26,12 +27,15 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose, lang }) => {
           tick();
         }
       } catch (err) {
+        console.error("QR Scanner Error:", err);
         alert(lang === 'ar' ? "فشل الوصول إلى الكاميرا" : "Camera access failed");
         onClose();
       }
     };
 
     const tick = () => {
+      if (!isScanning) return;
+
       if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
         const canvas = canvasRef.current;
         if (canvas) {
@@ -41,6 +45,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose, lang }) => {
             canvas.width = videoRef.current.videoWidth;
             context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            // استخدام jsQR مباشرة من الحزمة المثبتة
             const code = jsQR(imageData.data, imageData.width, imageData.height, {
               inversionAttempts: "dontInvert",
             });
@@ -52,19 +57,19 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose, lang }) => {
           }
         }
       }
-      if (isScanning) {
-        animationFrameId = requestAnimationFrame(tick);
-      }
+      animationFrameId = requestAnimationFrame(tick);
     };
 
     startScanner();
 
     return () => {
+      setIsScanning(false);
       cancelAnimationFrame(animationFrameId);
-      const stream = videoRef.current?.srcObject as MediaStream;
-      stream?.getTracks().forEach(track => track.stop());
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
     };
-  }, [isScanning]);
+  }, [isScanning, lang, onScan, onClose]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4">
